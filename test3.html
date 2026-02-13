@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Army Practice Test</title>
+<style>
+body{
+  font-family: Arial;
+  background:#ffffff;
+  margin:0;
+}
+.topbar{
+  background:#0b3d91;
+  color:white;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+}
+.container{
+  padding:20px;
+}
+.question{
+  font-size:20px;
+  margin-bottom:15px;
+}
+.option{
+  display:block;
+  padding:10px;
+  border:1px solid #ccc;
+  margin:8px 0;
+  cursor:pointer;
+  border-radius:5px;
+}
+.option.selected{
+  background:#0b5ed7;
+  color:white;
+}
+.nav{
+  margin-top:20px;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  background:#0b3d91;
+  color:white;
+  border-radius:5px;
+  cursor:pointer;
+}
+#result{
+  display:none;
+  padding:20px;
+}
+.correct{color:green;}
+.wrong{color:red;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>Army Practice Test</div>
+  <div>Time: <span id="timer">30:00</span></div>
+</div>
+
+<div class="container" id="quiz">
+  <div id="qnum"></div>
+  <div class="question" id="question"></div>
+  <div id="options"></div>
+
+  <div class="nav">
+    <button onclick="prevQ()">Previous</button>
+    <button onclick="nextQ()">Next</button>
+    <button onclick="submitTest()">Submit</button>
+  </div>
+</div>
+
+<div id="result"></div>
+
+<script>
+const questions = [
+{q:"भारत का संविधान कब लागू हुआ?",o:["15 अगस्त 1947","26 जनवरी 1950","26 नवंबर 1949","2 अक्टूबर 1948"],a:1},
+{q:"भारत का राष्ट्रीय पक्षी कौन है?",o:["कबूतर","तोता","मोर","हंस"],a:2},
+{q:"भारत की राजधानी क्या है?",o:["मुंबई","नई दिल्ली","चेन्नई","कोलकाता"],a:1},
+{q:"‘जय जवान जय किसान’ का नारा किसने दिया?",o:["गांधीजी","नेहरू","लाल बहादुर शास्त्री","सुभाष बोस"],a:2},
+{q:"भारतीय सेना दिवस कब मनाया जाता है?",o:["15 जनवरी","26 जनवरी","15 अगस्त","2 अक्टूबर"],a:0},
+{q:"ताजमहल किसने बनवाया?",o:["अकबर","जहांगीर","शाहजहां","बाबर"],a:2},
+{q:"भारत का राष्ट्रीय फल कौन सा है?",o:["केला","सेब","आम","संतरा"],a:2},
+{q:"भारत का राष्ट्रीय गान किसने लिखा?",o:["बंकिमचंद्र","रवीन्द्रनाथ टैगोर","गांधीजी","नेहरू"],a:1},
+{q:"जलियांवाला बाग हत्याकांड कब हुआ?",o:["1918","1919","1920","1930"],a:1},
+{q:"पृथ्वी का सबसे बड़ा महासागर कौन सा है?",o:["अटलांटिक","हिंद","प्रशांत","आर्कटिक"],a:2},
+
+{q:"पानी का रासायनिक सूत्र क्या है?",o:["CO2","H2O","O2","H2"],a:1},
+{q:"सबसे बड़ी हड्डी?",o:["रीढ़","खोपड़ी","फीमर","पसली"],a:2},
+{q:"पौधे भोजन कैसे बनाते हैं?",o:["श्वसन","प्रकाश संश्लेषण","पाचन","वाष्पोत्सर्जन"],a:1},
+{q:"सूर्य का प्रकाश पृथ्वी तक?",o:["8 सेकंड","8 मिनट","8 घंटे","1 दिन"],a:1},
+{q:"सबसे कठोर धातु?",o:["सोना","लोहा","प्लेटिनम","टंगस्टन"],a:3},
+
+{q:"25% of 200",o:["25","40","50","60"],a:2},
+{q:"15 + 18×2",o:["66","51","45","36"],a:1},
+{q:"√144",o:["10","11","12","14"],a:2},
+{q:"7×8+12",o:["56","60","68","72"],a:2},
+{q:"दोगुना =40 संख्या?",o:["10","15","20","25"],a:2},
+
+{q:"¾ of 80",o:["40","50","60","70"],a:2},
+{q:"LCM(18,24)",o:["36","48","60","72"],a:3},
+{q:"10% of 450",o:["40","45","50","55"],a:1},
+{q:"9³",o:["81","243","729","656"],a:2},
+{q:"56÷8",o:["6","7","8","9"],a:1},
+
+{q:"11×11",o:["111","121","131","141"],a:1},
+{q:"20% of 120",o:["20","22","24","26"],a:2},
+{q:"45+55",o:["90","95","100","105"],a:2},
+{q:"√81",o:["7","8","9","10"],a:2},
+{q:"14×5",o:["60","65","70","75"],a:2},
+
+{q:"2,4,6,8,?",o:["9","10","11","12"],a:1},
+{q:"A,C,E,G,?",o:["H","I","J","K"],a:1},
+{q:"5,10,20,40,?",o:["60","70","80","90"],a:2},
+{q:"CAT→DBU, DOG→?",o:["EPH","DPH","EOG","FPH"],a:0},
+{q:"3:00 पर कोण?",o:["60°","75°","90°","120°"],a:2}
+];
+
+let current=0;
+let answers=new Array(questions.length).fill(null);
+
+function loadQ(){
+  let q=questions[current];
+  document.getElementById("qnum").innerText="Question "+(current+1)+"/"+questions.length;
+  document.getElementById("question").innerText=q.q;
+  let optHTML="";
+  q.o.forEach((opt,i)=>{
+    let sel=answers[current]==i?"selected":"";
+    optHTML+=`<div class="option ${sel}" onclick="select(${i})">${opt}</div>`;
+  });
+  document.getElementById("options").innerHTML=optHTML;
+}
+
+function select(i){
+  answers[current]=i;
+  loadQ();
+}
+
+function nextQ(){
+  if(current<questions.length-1){
+    current++;
+    loadQ();
+  }
+}
+function prevQ(){
+  if(current>0){
+    current--;
+    loadQ();
+  }
+}
+
+function submitTest(){
+  let score=0;
+  let html="<h2>Result</h2>";
+  questions.forEach((q,i)=>{
+    if(answers[i]==q.a) score++;
+    let cls=(answers[i]==q.a)?"correct":"wrong";
+    html+=`<p class="${cls}">Q${i+1}: Correct Answer - ${q.o[q.a]}</p>`;
+  });
+  html+=`<h3>Total Score: ${score}/${questions.length}</h3>`;
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").style.display="block";
+  document.getElementById("result").innerHTML=html;
+}
+
+// timer
+let time=1800;
+setInterval(()=>{
+  let m=Math.floor(time/60);
+  let s=time%60;
+  document.getElementById("timer").innerText=
+    m+":"+(s<10?"0"+s:s);
+  if(time>0) time--;
+},1000);
+
+loadQ();
+</script>
+</body>
+</html>
