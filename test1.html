@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Agniveer Practice Test</title>
+<style>
+body{
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+}
+.container{
+  width:90%;
+  max-width:700px;
+  margin:auto;
+  background:#111827;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 15px black;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  border-radius:5px;
+  background:#22c55e;
+  color:black;
+  font-weight:bold;
+}
+.timer{
+  font-size:20px;
+  color:#facc15;
+}
+.correct{color:#22c55e;}
+.wrong{color:#ef4444;}
+</style>
+</head>
+<body>
+
+<div class="container" id="testBox">
+<h2>🪖 Agniveer Practice Test</h2>
+<div class="timer">Time: <span id="time">00:00</span></div>
+<h3 id="qno"></h3>
+<p id="question"></p>
+<div id="options"></div>
+
+<button onclick="prev()">Previous</button>
+<button onclick="next()">Next</button>
+<button onclick="submitTest()">Submit</button>
+</div>
+
+<div class="container" id="resultBox" style="display:none;">
+<h2>Result</h2>
+<h3 id="score"></h3>
+<button onclick="showAnalysis()">Analysis</button>
+</div>
+
+<div class="container" id="analysisBox" style="display:none;">
+<h2>Analysis</h2>
+<div id="analysis"></div>
+<button onclick="showSolution()">Show Solution</button>
+</div>
+
+<div class="container" id="solutionBox" style="display:none;">
+<h2>Solutions</h2>
+<div id="solution"></div>
+<button onclick="nextSolution()">Next Solution</button>
+</div>
+
+<script>
+let questions = [
+{q:"Article 370 kis state se related tha?",opt:["Punjab","Assam","Jammu-Kashmir","Nagaland"],ans:2,sol:"Article 370 Jammu-Kashmir ko special status deta tha."},
+{q:"Gadar Party kaha bani?",opt:["India","England","America","Japan"],ans:2,sol:"Gadar Party USA me bani thi."},
+{q:"India ka first satellite?",opt:["Rohini","Aryabhatt","Bhaskar","INSAT"],ans:1,sol:"Aryabhatt 1975 me launch hua tha."},
+{q:"Delhi Chalo slogan kisne diya?",opt:["Gandhi","Bose","Nehru","Patel"],ans:1,sol:"Subhas Chandra Bose ne diya."},
+{q:"Chipko movement kaha se start hua?",opt:["HP","Uttarakhand","Rajasthan","Bihar"],ans:1,sol:"Chipko movement Uttarakhand se start hua."},
+
+{q:"35% of 720?",opt:["240","252","260","270"],ans:1,sol:"720 × 35/100 = 252"},
+{q:"HCF of 18 and 30?",opt:["3","6","9","12"],ans:1,sol:"HCF = 6"},
+{q:"40% of number =120, number?",opt:["240","260","280","300"],ans:3,sol:"120×100/40 =300"},
+{q:"2³ × 3²=?",opt:["36","48","54","72"],ans:3,sol:"8×9=72"},
+{q:"0.25×0.4=?",opt:["0.01","0.1","0.2","1"],ans:1,sol:"=0.1"},
+
+{q:"3/8 +5/12=?",opt:["11/24","19/24","23/24","29/24"],ans:1,sol:"=19/24"},
+{q:"1500 ka 12%?",opt:["160","170","180","190"],ans:2,sol:"=180"},
+{q:"1.5×1.2=?",opt:["1.6","1.7","1.8","2.0"],ans:2,sol:"=1.8"},
+{q:"x/5=9, x=?",opt:["35","40","45","50"],ans:2,sol:"x=45"},
+{q:"17²−13²=?",opt:["80","100","120","140"],ans:2,sol:"=120"},
+
+{q:"4,6,9,13,18,?",opt:["22","23","24","25"],ans:2,sol:"+2,+3,+4,+5 → next +6 =24"},
+{q:"Book:Read :: Food:?",opt:["Cook","Eat","Buy","Taste"],ans:1,sol:"Food ko Eat karte hain"},
+{q:"Odd:9,16,25,36,49,64,72",opt:["25","49","64","72"],ans:3,sol:"72 perfect square nahi hai."}
+];
+
+// auto fill till 50
+while(questions.length<50){
+let n=questions.length+1;
+questions.push({
+q:"Practice Question "+n,
+opt:["A","B","C","D"],
+ans:0,
+sol:"Solution of question "+n
+});
+}
+
+let index=0;
+let answers=new Array(50).fill(null);
+let time=0;
+
+setInterval(()=>{
+time++;
+let m=Math.floor(time/60);
+let s=time%60;
+document.getElementById("time").innerText=
+String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
+},1000);
+
+function loadQ(){
+let q=questions[index];
+document.getElementById("qno").innerText="Q"+(index+1);
+document.getElementById("question").innerText=q.q;
+let optHTML="";
+q.opt.forEach((o,i)=>{
+optHTML+=`<div>
+<label>
+<input type="radio" name="opt" 
+${answers[index]==i?"checked":""}
+onclick="answers[${index}]=${i}">
+${o}
+</label></div>`;
+});
+document.getElementById("options").innerHTML=optHTML;
+}
+loadQ();
+
+function next(){
+if(index<49){index++;loadQ();}
+}
+function prev(){
+if(index>0){index--;loadQ();}
+}
+
+function submitTest(){
+let score=0;
+questions.forEach((q,i)=>{
+if(answers[i]==q.ans)score++;
+});
+localStorage.setItem("lastScore",score);
+document.getElementById("testBox").style.display="none";
+document.getElementById("resultBox").style.display="block";
+document.getElementById("score").innerText="Score: "+score+"/50";
+}
+
+function showAnalysis(){
+let html="";
+questions.forEach((q,i)=>{
+if(answers[i]==q.ans)
+html+=`<p class="correct">Q${i+1} Correct</p>`;
+else
+html+=`<p class="wrong">Q${i+1} Wrong</p>`;
+});
+document.getElementById("analysis").innerHTML=html;
+document.getElementById("analysisBox").style.display="block";
+}
+
+let solIndex=0;
+function showSolution(){
+document.getElementById("solutionBox").style.display="block";
+showSol();
+}
+function showSol(){
+let q=questions[solIndex];
+document.getElementById("solution").innerHTML=
+`<p>Q${solIndex+1}: ${q.q}</p>
+<p>Solution: ${q.sol}</p>`;
+}
+function nextSolution(){
+if(solIndex<49){
+solIndex++;
+showSol();
+}
+}
+</script>
+
+</body>
+</html>
