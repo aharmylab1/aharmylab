@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>अग्निवीर कंप्यूटर टेस्ट</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+}
+.header{
+  background:#111827;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+}
+.main{
+  display:flex;
+  height:calc(100vh - 50px);
+}
+.palette{
+  width:120px;
+  background:#020617;
+  padding:10px;
+  overflow:auto;
+}
+.palette button{
+  width:40px;
+  height:40px;
+  margin:4px;
+  border:none;
+  border-radius:5px;
+  background:#374151;
+  color:white;
+  cursor:pointer;
+}
+.palette button.answered{background:#22c55e;}
+.palette button.skipped{background:#eab308;}
+
+.content{
+  flex:1;
+  padding:20px;
+}
+.option{
+  display:block;
+  padding:10px;
+  margin:8px 0;
+  background:#1f2937;
+  border-radius:5px;
+  cursor:pointer;
+}
+.option:hover{background:#374151;}
+
+.nav{
+  margin-top:15px;
+}
+button{
+  padding:10px 15px;
+  margin:5px;
+  border:none;
+  border-radius:5px;
+  background:#22c55e;
+  font-weight:bold;
+  cursor:pointer;
+}
+.correct{color:#22c55e;}
+.wrong{color:#ef4444;}
+.skip{color:#eab308;}
+
+table{
+  width:100%;
+  background:#111827;
+  border-collapse:collapse;
+}
+th,td{
+  padding:10px;
+  border:1px solid #374151;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h3>🪖 अग्निवीर टेस्ट</h3>
+<div>समय: <span id="time">30:00</span></div>
+</div>
+
+<div class="main">
+<div class="palette" id="palette"></div>
+
+<div class="content" id="content">
+<h2>टेस्ट शुरू करें</h2>
+<button onclick="startTest()">Start Test</button>
+</div>
+</div>
+
+<script>
+let questions=[
+{q:"भारतीय संविधान की प्रस्तावना में ‘समाजवादी’ शब्द कब जोड़ा गया?",
+o:["1950","1962","1976","1985"],a:2,
+s:"42वें संशोधन (1976) में जोड़ा गया।"},
+{q:"भारत छोड़ो आंदोलन कब शुरू हुआ?",
+o:["1930","1942","1945","1947"],a:1,
+s:"1942 में शुरू हुआ था।"},
+{q:"भारत का सबसे बड़ा राज्य कौन सा है?",
+o:["उत्तर प्रदेश","महाराष्ट्र","राजस्थान","मध्य प्रदेश"],a:2,
+s:"राजस्थान सबसे बड़ा राज्य है।"},
+{q:"प्रकाश की गति कितनी होती है?",
+o:["3×10⁶","3×10⁸","3×10⁷","3×10⁵"],a:1,
+s:"3×10⁸ m/s"},
+{q:"720 का 35% कितना है?",
+o:["240","252","260","270"],a:1,
+s:"720 × 35% = 252"}
+];
+
+let answers=new Array(questions.length).fill(null);
+let current=0;
+let time=1800;
+let timer;
+
+function startTest(){
+createPalette();
+showQ();
+timer=setInterval(updateTime,1000);
+}
+
+function createPalette(){
+let html="";
+questions.forEach((q,i)=>{
+html+=`<button id="p${i}" onclick="gotoQ(${i})">${i+1}</button>`;
+});
+document.getElementById("palette").innerHTML=html;
+}
+
+function showQ(){
+let q=questions[current];
+let html=`<h3>प्रश्न ${current+1}</h3><p>${q.q}</p>`;
+q.o.forEach((opt,i)=>{
+let checked=answers[current]==i?"style='background:#22c55e'":"";
+html+=`<div class="option" ${checked}
+onclick="select(${i})">${opt}</div>`;
+});
+html+=`
+<div class="nav">
+<button onclick="prevQ()">Previous</button>
+<button onclick="nextQ()">Next</button>
+<button onclick="submitTest()">Submit</button>
+</div>`;
+document.getElementById("content").innerHTML=html;
+updatePalette();
+}
+
+function select(i){
+answers[current]=i;
+showQ();
+}
+
+function nextQ(){
+if(current<questions.length-1){current++;showQ();}
+}
+
+function prevQ(){
+if(current>0){current--;showQ();}
+}
+
+function gotoQ(i){
+current=i;
+showQ();
+}
+
+function updatePalette(){
+questions.forEach((q,i)=>{
+let btn=document.getElementById("p"+i);
+btn.classList.remove("answered","skipped");
+if(answers[i]!=null) btn.classList.add("answered");
+});
+}
+
+function updateTime(){
+time--;
+let m=Math.floor(time/60);
+let s=time%60;
+document.getElementById("time").innerText=
+(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+if(time<=0) submitTest();
+}
+
+function submitTest(){
+clearInterval(timer);
+let score=0;
+questions.forEach((q,i)=>{
+if(answers[i]==q.a) score++;
+});
+
+let name=prompt("अपना नाम डालें:");
+if(name){
+let data=JSON.parse(localStorage.getItem("board")||"[]");
+data.push({name,score});
+localStorage.setItem("board",JSON.stringify(data));
+}
+
+let html=`<h2>Result</h2>
+<h3>Score: ${score}/${questions.length}</h3>
+<button onclick="analysis()">Analysis</button>
+<button onclick="leaderboard()">Leaderboard</button>`;
+document.getElementById("content").innerHTML=html;
+}
+
+function analysis(){
+let html="<h2>Analysis</h2>";
+questions.forEach((q,i)=>{
+let cls="skip";
+if(answers[i]==q.a) cls="correct";
+else if(answers[i]!=null) cls="wrong";
+
+html+=`<p class="${cls}">
+प्रश्न ${i+1}
+</p>`;
+});
+html+=`<button onclick="solution(0)">Solution देखें</button>`;
+document.getElementById("content").innerHTML=html;
+}
+
+function solution(i){
+let q=questions[i];
+let html=`
+<h3>प्रश्न ${i+1}</h3>
+<p>${q.q}</p>
+<p class="correct">सही उत्तर: ${q.o[q.a]}</p>
+<p>${q.s}</p>
+`;
+if(i<questions.length-1)
+html+=`<button onclick="solution(${i+1})">Next Solution</button>`;
+document.getElementById("content").innerHTML=html;
+}
+
+function leaderboard(){
+let data=JSON.parse(localStorage.getItem("board")||"[]");
+data.sort((a,b)=>b.score-a.score);
+let html="<h2>Leaderboard</h2><table><tr><th>नाम</th><th>Score</th></tr>";
+data.forEach(d=>{
+html+=`<tr><td>${d.name}</td><td>${d.score}</td></tr>`;
+});
+html+="</table>";
+document.getElementById("content").innerHTML=html;
+}
+</script>
+
+</body>
+</html>
