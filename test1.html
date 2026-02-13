@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Agniveer Computer Test</title>
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#ffffff;
+}
+.header{
+    background:#1a73e8;
+    color:white;
+    padding:10px;
+    display:flex;
+    justify-content:space-between;
+}
+.container{
+    display:flex;
+}
+.left{
+    width:70%;
+    padding:20px;
+}
+.right{
+    width:30%;
+    background:#f1f1f1;
+    padding:10px;
+    height:90vh;
+    overflow:auto;
+}
+button{
+    padding:8px 12px;
+    margin:4px;
+    cursor:pointer;
+}
+.palette button{
+    width:40px;
+    height:40px;
+}
+.answered{background:#4caf50;color:white;}
+.current{border:3px solid red;}
+.correct{color:green;}
+.wrong{color:red;}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h3>Agniveer Practice Test</h3>
+    <h3>Time: <span id="timer">30:00</span></h3>
+</div>
+
+<div class="container">
+    <div class="left">
+        <div id="questionBox"></div>
+        <div id="optionsBox"></div>
+        <br>
+        <button onclick="prevQ()">Previous</button>
+        <button onclick="nextQ()">Next</button>
+        <button onclick="submitTest()">Submit Test</button>
+    </div>
+
+    <div class="right">
+        <h4>Question Palette</h4>
+        <div class="palette" id="palette"></div>
+    </div>
+</div>
+
+<script>
+const questions = [
+{q:"अनुच्छेद 370 किस राज्य से संबंधित था?",o:["पंजाब","असम","जम्मू-कश्मीर","नागालैंड"],a:2},
+{q:"गदर पार्टी कहाँ बनी?",o:["भारत","इंग्लैंड","अमेरिका","जापान"],a:2},
+{q:"पहला उपग्रह?",o:["रोहिणी","आर्यभट्ट","भास्कर","इनसैट"],a:1},
+{q:"दिल्ली चलो किसने कहा?",o:["गांधी","बोस","नेहरू","पटेल"],a:1},
+{q:"चिपको आंदोलन कहाँ?",o:["हिमाचल","उत्तराखंड","राजस्थान","बिहार"],a:1},
+{q:"योजना आयोग की जगह?",o:["वित्त","नीति","योजना परिषद","आर्थिक"],a:1},
+{q:"सबसे बड़ा बंदरगाह?",o:["कांडला","मुंबई","विशाखापत्तनम","कोच्चि"],a:1},
+{q:"सत्यमेव जयते कहाँ से?",o:["गीता","ऋग्वेद","मुण्डक","रामायण"],a:2},
+{q:"1857 कानपुर नेता?",o:["तात्या","नाना","लक्ष्मी","कुंवर"],a:1},
+{q:"सबसे बड़ा मरुस्थल?",o:["थार","सहारा","गोबी","कालाहारी"],a:0},
+
+{q:"लौह पुरुष?",o:["पटेल","नेहरू","बोस","तिलक"],a:0},
+{q:"पहला पंचायती राज राज्य?",o:["राजस्थान","बिहार","यूपी","एमपी"],a:0},
+{q:"सबसे ऊँची चोटी?",o:["K2","कंचनजंघा","नंदा","कामेत"],a:1},
+{q:"कांग्रेस स्थापना?",o:["1885","1905","1919","1920"],a:0},
+{q:"अनुसूचियाँ कितनी?",o:["8","10","12","14"],a:2},
+
+{q:"धातु चालकता कारण?",o:["प्रोटॉन","न्यूट्रॉन","मुक्त इलेक्ट्रॉन","आयन"],a:2},
+{q:"रक्तचाप यंत्र?",o:["स्टेथो","स्पाइग्मो","थर्मो","बैरो"],a:1},
+{q:"ओजोन गैस?",o:["O2","CO2","O3","N2"],a:2},
+{q:"कार्य SI?",o:["न्यूटन","जूल","वाट","पास्कल"],a:1},
+{q:"इंसुलिन ग्रंथि?",o:["यकृत","अग्न्याशय","थायरॉइड","पिट्यूटरी"],a:1},
+
+{q:"प्रकाश अपवर्तन कारण?",o:["वेग","दाब","ताप","घनत्व"],a:0},
+{q:"स्टेनलेस स्टील?",o:["Fe+C","Fe+Cr+Ni","Cu+Zn","Al+Cu"],a:1},
+{q:"पित्त रस?",o:["पेट","यकृत","अग्न्याशय","आंत"],a:1},
+{q:"ध्वनि इकाई?",o:["डेसीबल","हर्ट्ज","न्यूटन","वाट"],a:0},
+{q:"डायोड उपयोग?",o:["ताप","धारा एक दिशा","दाब","प्रकाश"],a:1},
+
+{q:"RBC जीवनकाल?",o:["30","60","90","120"],a:3},
+{q:"जंग अभिक्रिया?",o:["अपचयन","ऑक्सीकरण","उर्ध्व","संयोजन"],a:1},
+{q:"न्यूटन दूसरा नियम?",o:["जड़त्व","संवेग","ऊर्जा","गुरुत्व"],a:1},
+{q:"विटामिन थक्का?",o:["A","C","K","D"],a:2},
+{q:"ताप बढ़े गैस आयतन?",o:["घट","बढ़","स्थिर","शून्य"],a:1},
+
+{q:"720 का 35%?",o:["240","252","260","270"],a:1},
+{q:"18 और 30 HCF?",o:["3","6","9","12"],a:1},
+{q:"40%=120, संख्या?",o:["240","260","280","300"],a:3},
+{q:"12 मजदूर 8 दिन, 6?",o:["12","14","16","18"],a:2},
+{q:"2³×3²?",o:["36","48","54","72"],a:3},
+
+{q:"0.25×0.4?",o:["0.01","0.1","0.2","1"],a:1},
+{q:"45,60,75 LCM?",o:["150","180","225","900"],a:3},
+{q:"लाभ%?",o:["10","12","15","20"],a:2},
+{q:"x/5=9?",o:["35","40","45","50"],a:2},
+{q:"16,25,36,49,?",o:["56","60","64","81"],a:2},
+
+{q:"3/8+5/12?",o:["11/24","19/24","23/24","29/24"],a:1},
+{q:"1500 का 12%?",o:["160","170","180","190"],a:2},
+{q:"17²−13²?",o:["80","100","120","140"],a:2},
+{q:"4x+5=21?",o:["2","3","4","5"],a:2},
+{q:"1.5×1.2?",o:["1.6","1.7","1.8","2.0"],a:2},
+
+{q:"4,6,9,13,18,?",o:["22","23","24","25"],a:2},
+{q:"Z,X,U,Q,?",o:["M","N","O","P"],a:0},
+{q:"Mirror time 2:25?",o:["9:35","9:25","8:35","7:35"],a:0},
+{q:"Book:Read::Food?",o:["Cook","Eat","Buy","Taste"],a:1},
+{q:"Odd one out?",o:["25","49","64","72"],a:3}
+];
+
+let answers = new Array(questions.length).fill(null);
+let current = 0;
+let time = 1800;
+
+function showQuestion(){
+    document.getElementById("questionBox").innerHTML =
+    "<h3>Q"+(current+1)+". "+questions[current].q+"</h3>";
+
+    let html="";
+    questions[current].o.forEach((opt,i)=>{
+        html+=`<button onclick="select(${i})">${opt}</button><br>`;
+    });
+    document.getElementById("optionsBox").innerHTML = html;
+    updatePalette();
+}
+
+function select(i){
+    answers[current]=i;
+    updatePalette();
+}
+
+function nextQ(){
+    if(current<questions.length-1) current++;
+    showQuestion();
+}
+
+function prevQ(){
+    if(current>0) current--;
+    showQuestion();
+}
+
+function buildPalette(){
+    let html="";
+    for(let i=0;i<questions.length;i++){
+        html+=`<button onclick="go(${i})" id="p${i}">${i+1}</button>`;
+    }
+    document.getElementById("palette").innerHTML=html;
+}
+
+function go(i){
+    current=i;
+    showQuestion();
+}
+
+function updatePalette(){
+    for(let i=0;i<questions.length;i++){
+        let btn=document.getElementById("p"+i);
+        btn.className="";
+        if(answers[i]!=null) btn.classList.add("answered");
+        if(i===current) btn.classList.add("current");
+    }
+}
+
+function submitTest(){
+    let score=0;
+    let analysis="<h2>Result</h2>";
+    questions.forEach((q,i)=>{
+        if(answers[i]===q.a) score++;
+        analysis+=`Q${i+1}: `;
+        if(answers[i]===q.a){
+            analysis+="<span class='correct'>Correct</span><br>";
+        }else{
+            analysis+="<span class='wrong'>Wrong</span> (Ans: "+q.o[q.a]+")<br>";
+        }
+    });
+    analysis+="<h3>Score: "+score+" / "+questions.length+"</h3>";
+    analysis+="<h3>Leaderboard Rank: #1</h3>";
+
+    document.body.innerHTML=analysis;
+}
+
+setInterval(()=>{
+    time--;
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("timer").innerText=
+    (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+    if(time<=0) submitTest();
+},1000);
+
+buildPalette();
+showQuestion();
+</script>
+</body>
+</html>
