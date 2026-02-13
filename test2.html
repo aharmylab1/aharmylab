@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Agniveer Test 2</title>
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#ffffff;
+}
+.header{
+    background:#1a73e8;
+    color:white;
+    padding:10px;
+    display:flex;
+    justify-content:space-between;
+}
+.container{
+    display:flex;
+}
+.left{
+    width:70%;
+    padding:20px;
+}
+.right{
+    width:30%;
+    background:#f1f1f1;
+    padding:10px;
+    height:90vh;
+    overflow:auto;
+}
+button{
+    padding:8px 12px;
+    margin:4px;
+    cursor:pointer;
+}
+.option{
+    display:block;
+    width:300px;
+    text-align:left;
+    background:#eee;
+}
+.selected{
+    background:#1a73e8;
+    color:white;
+}
+.palette button{
+    width:40px;
+    height:40px;
+}
+.answered{background:#4caf50;color:white;}
+.current{border:3px solid red;}
+.correct{color:green;}
+.wrong{color:red;}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h3>Agniveer Practice Test – 2</h3>
+    <h3>Time: <span id="timer">30:00</span></h3>
+</div>
+
+<div class="container">
+    <div class="left">
+        <div id="questionBox"></div>
+        <div id="optionsBox"></div>
+        <br>
+        <button onclick="prevQ()">Previous</button>
+        <button onclick="nextQ()">Next</button>
+        <button onclick="submitTest()">Submit Test</button>
+    </div>
+
+    <div class="right">
+        <h4>Question Palette</h4>
+        <div class="palette" id="palette"></div>
+    </div>
+</div>
+
+<script>
+const questions = [
+{q:"मौलिक कर्तव्य किस अनुच्छेद में हैं?",o:["32","44","51A","21"],a:2},
+{q:"इलाहाबाद संधि वर्ष?",o:["1757","1764","1765","1772"],a:2},
+{q:"द्वितीय गोलमेज सम्मेलन में कांग्रेस?",o:["नेहरू","गांधी","पटेल","जिन्ना"],a:1},
+{q:"पहली रेल वर्ष?",o:["1853","1857","1861","1870"],a:0},
+{q:"काकोरी कांड वर्ष?",o:["1919","1925","1931","1942"],a:1},
+{q:"कांग्रेस प्रथम अध्यक्ष?",o:["नौरोजी","गोखले","बनर्जी","तिलक"],a:2},
+{q:"सबसे लंबा राष्ट्रीय राजमार्ग?",o:["NH44","NH27","NH48","NH7"],a:0},
+{q:"नील विद्रोह?",o:["बिहार","बंगाल","यूपी","ओडिशा"],a:1},
+{q:"संविधान में भाग?",o:["18","20","22","25"],a:3},
+{q:"लाहौर अधिवेशन घोषणा?",o:["स्वराज","पूर्ण स्वराज","डोमिनियन","सभा"],a:1},
+
+{q:"विक्रम साराभाई केंद्र?",o:["बेंगलुरु","चेन्नई","तिरुवनंतपुरम","हैदराबाद"],a:2},
+{q:"श्वेत क्रांति जनक?",o:["स्वामीनाथन","कुरियन","भाभा","साराभाई"],a:1},
+{q:"भाखड़ा नांगल नदी?",o:["गंगा","सतलुज","यमुना","नर्मदा"],a:1},
+{q:"सबसे बड़ा राज्य जनसंख्या?",o:["महाराष्ट्र","बिहार","प. बंगाल","उ.प्र."],a:3},
+{q:"अशोक चक्र तीलियाँ?",o:["18","20","24","28"],a:2},
+
+{q:"DNA पूरा नाम?",o:["Deoxyribose","Deoxyribonucleic","Dynamic","Dual"],a:1},
+{q:"सबसे छोटी हड्डी?",o:["स्टेप्स","फेमर","टिबिया","अल्ना"],a:0},
+{q:"आवृत्ति इकाई?",o:["न्यूटन","जूल","हर्ट्ज","वाट"],a:2},
+{q:"सबसे प्रतिक्रियाशील धातु?",o:["सोना","सोडियम","लोहा","तांबा"],a:1},
+{q:"जल परिवहन ऊतक?",o:["फ्लोएम","जाइलम","एपिडर्मिस","पेरेंकाइमा"],a:1},
+
+{q:"रक्त pH?",o:["6.0","6.5","7.4","8.0"],a:2},
+{q:"लेंस शक्ति इकाई?",o:["जूल","डायोप्टर","न्यूटन","वाट"],a:1},
+{q:"अमोनिया सूत्र?",o:["NH4","NH3","N2H4","NO2"],a:1},
+{q:"धातु चादर क्षमता?",o:["तन्यता","आघातवर्धनीयता","चालकता","घनत्व"],a:1},
+{q:"प्रकाश संश्लेषण गैस?",o:["CO2","O2","N2","H2"],a:1},
+
+{q:"शरीर तापमान?",o:["35","36","37","38"],a:2},
+{q:"पेनिसिलिन खोज?",o:["न्यूटन","आइंस्टीन","फ्लेमिंग","डार्विन"],a:2},
+{q:"परमाणु केंद्र?",o:["इलेक्ट्रॉन","नाभिक","प्रोटॉन","न्यूट्रॉन"],a:1},
+{q:"दृष्टि विटामिन?",o:["A","B","C","D"],a:0},
+{q:"विद्युत शक्ति सूत्र?",o:["V/I","VI","I/R","V+I"],a:1},
+
+{q:"840 का 15%?",o:["116","120","126","130"],a:2},
+{q:"24 और 36 LCM?",o:["48","60","72","96"],a:2},
+{q:"25%=45, संख्या?",o:["160","170","180","200"],a:2},
+{q:"8 आदमी 15 दिन, 12?",o:["8","10","12","14"],a:1},
+{q:"14²−10²?",o:["96","100","120","140"],a:0},
+
+{q:"0.6×0.25?",o:["0.10","0.12","0.15","0.18"],a:2},
+{q:"21,28,36,45,?",o:["54","55","56","57"],a:1},
+{q:"5/6+7/12?",o:["3/2","4/3","17/12","19/12"],a:2},
+{q:"लाभ%?",o:["10","12","15","20"],a:2},
+{q:"3x−5=16?",o:["6","7","8","9"],a:1},
+
+{q:"18²?",o:["284","294","324","364"],a:2},
+{q:"480÷16?",o:["20","25","30","35"],a:2},
+{q:"2³×5²?",o:["100","150","200","250"],a:2},
+{q:"1.25×0.8?",o:["0.9","1.0","1.1","1.2"],a:1},
+{q:"x:y=3:4, x=24?",o:["28","30","32","36"],a:2},
+
+{q:"5,11,23,47,?",o:["91","94","95","96"],a:2},
+{q:"B,E,I,N,?",o:["R","S","T","U"],a:2},
+{q:"Mirror 6:20?",o:["5:40","5:50","6:40","7:40"],a:0},
+{q:"Doctor:Hospital::Teacher?",o:["School","Book","Student","Class"],a:0},
+{q:"Odd one?",o:["27","64","100","125"],a:2}
+];
+
+let answers = new Array(questions.length).fill(null);
+let current = 0;
+let time = 1800;
+
+function showQuestion(){
+    document.getElementById("questionBox").innerHTML =
+    "<h3>Q"+(current+1)+". "+questions[current].q+"</h3>";
+
+    let html="";
+    questions[current].o.forEach((opt,i)=>{
+        let sel = answers[current]===i ? "selected":"";
+        html+=`<button class="option ${sel}" onclick="select(${i})">${opt}</button>`;
+    });
+    document.getElementById("optionsBox").innerHTML = html;
+    updatePalette();
+}
+
+function select(i){
+    answers[current]=i;
+    showQuestion();
+}
+
+function nextQ(){ if(current<49) current++; showQuestion(); }
+function prevQ(){ if(current>0) current--; showQuestion(); }
+
+function buildPalette(){
+    let html="";
+    for(let i=0;i<50;i++){
+        html+=`<button onclick="go(${i})" id="p${i}">${i+1}</button>`;
+    }
+    document.getElementById("palette").innerHTML=html;
+}
+
+function go(i){ current=i; showQuestion(); }
+
+function updatePalette(){
+    for(let i=0;i<50;i++){
+        let btn=document.getElementById("p"+i);
+        btn.className="";
+        if(answers[i]!=null) btn.classList.add("answered");
+        if(i===current) btn.classList.add("current");
+    }
+}
+
+function submitTest(){
+    let score=0;
+    let analysis="<h2>Result</h2>";
+    questions.forEach((q,i)=>{
+        if(answers[i]===q.a) score++;
+        analysis+=`Q${i+1}: `;
+        if(answers[i]===q.a){
+            analysis+="<span class='correct'>Correct</span><br>";
+        }else{
+            analysis+="<span class='wrong'>Wrong</span> (Ans: "+q.o[q.a]+")<br>";
+        }
+    });
+    analysis+="<h3>Score: "+score+" / 50</h3>";
+    analysis+="<h3>Leaderboard Rank: #1</h3>";
+    document.body.innerHTML=analysis;
+}
+
+setInterval(()=>{
+    time--;
+    let m=Math.floor(time/60);
+    let s=time%60;
+    document.getElementById("timer").innerText=
+    (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+    if(time<=0) submitTest();
+},1000);
+
+buildPalette();
+showQuestion();
+</script>
+</body>
+</html>
